@@ -1,0 +1,46 @@
+{
+  "_format": "hh-zkit-artifacts-1",
+  "circuitTemplateName": "BugProof",
+  "circuitFileName": "bugProof",
+  "circuitSourceName": "circuits/bugProof.circom",
+  "baseCircuitInfo": {
+    "constraintsNumber": 415,
+    "signals": [
+      {
+        "name": "bugDetails",
+        "dimension": [],
+        "type": "Input",
+        "visibility": "Private"
+      },
+      {
+        "name": "hash",
+        "dimension": [],
+        "type": "Output",
+        "visibility": "Public"
+      }
+    ],
+    "parameters": {}
+  },
+  "compilerOutputFiles": {
+    "r1cs": {
+      "fileSourcePath": "C:\\Users\\jaind\\Desktop\\Electroneum-Project\\Blockchain\\zkit\\artifacts\\circuits\\bugProof.circom\\BugProof.r1cs",
+      "fileHash": "490eb8df5703e61826d8f5707293dc3d23db669c"
+    },
+    "wasm": {
+      "fileSourcePath": "C:\\Users\\jaind\\Desktop\\Electroneum-Project\\Blockchain\\zkit\\artifacts\\circuits\\bugProof.circom\\BugProof_js\\BugProof.wasm",
+      "fileHash": "ea33cf5007f1a44ce9dc827c13d8fa0347f79054"
+    },
+    "sym": {
+      "fileSourcePath": "C:\\Users\\jaind\\Desktop\\Electroneum-Project\\Blockchain\\zkit\\artifacts\\circuits\\bugProof.circom\\BugProof.sym",
+      "fileHash": "569755fe5aabad4014a148d6a48acbab92c19904"
+    },
+    "groth16.zkey": {
+      "fileSourcePath": "C:\\Users\\jaind\\Desktop\\Electroneum-Project\\Blockchain\\zkit\\artifacts\\circuits\\bugProof.circom\\BugProof.groth16.zkey",
+      "fileHash": "0a9aee69a668805fd4df41aa85afa555ccbb42f2"
+    },
+    "groth16.vkey": {
+      "fileSourcePath": "C:\\Users\\jaind\\Desktop\\Electroneum-Project\\Blockchain\\zkit\\artifacts\\circuits\\bugProof.circom\\BugProof.groth16.vkey.json",
+      "fileHash": "3fa553e34382bc86fc30c3a09a6b64bfc19b8022"
+    }
+  }
+}

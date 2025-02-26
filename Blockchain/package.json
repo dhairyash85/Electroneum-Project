@@ -1,0 +1,15 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.18"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.2.0",
+    "@solarity/hardhat-zkit": "^0.5.11",
+    "circomlib": "^2.0.5",
+    "make": "^0.8.1",
+    "snarkjs": "^0.7.5",
+    "zkit": "^0.3.5"
+  }
+}
