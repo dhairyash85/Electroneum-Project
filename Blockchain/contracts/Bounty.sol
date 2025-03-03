@@ -83,10 +83,10 @@ contract BugBounty is Verifier {
     function submitBugWithProof(
         uint256 _bountyId,
         bytes32 _submissionHash,
-        uint256[2] memory a,
-        uint256[2][2] memory b,
-        uint256[2] memory c,
-        uint256[1] memory input
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
+        uint256[1] calldata input
     ) external {
         require(bounties[_bountyId].isOpen, "Bounty closed");
         // Verify the zk-SNARK proof on-chain.
@@ -167,5 +167,47 @@ contract BugBounty is Verifier {
         reputationNFT.decreaseReputation(bug.tokenId, 1);
         reputationNFT.unstakeNFT(bug.tokenId);
         emit UnsolicitedBugRejected(_bugId, bug.researcher);
+    }
+
+    // =========================================
+    // Getter functions
+    // =========================================
+
+    // Get a single bounty by its ID.
+    function getBounty(uint256 _bountyId) external view returns (Bounty memory) {
+        return bounties[_bountyId];
+    }
+
+    // Get all bounties.
+    function getAllBounties() external view returns (Bounty[] memory) {
+        Bounty[] memory allBounties = new Bounty[](bountyCount);
+        for (uint256 i = 1; i <= bountyCount; i++) {
+            allBounties[i - 1] = bounties[i];
+        }
+        return allBounties;
+    }
+
+    // Get a single submission from a bounty by index.
+    function getSubmission(uint256 _bountyId, uint256 _index) external view returns (Submission memory) {
+        return submissions[_bountyId][_index];
+    }
+
+    // Get all submissions for a specific bounty.
+    function getSubmissions(uint256 _bountyId) external view returns (Submission[] memory) {
+        return submissions[_bountyId];
+    }
+
+    // Get a single unsolicited bug report by its ID.
+    function getUnsolicitedBug(uint256 _bugId) external view returns (UnsolicitedBug memory) {
+        return unsolicitedBugs[_bugId];
+    }
+
+    // Get all unsolicited bug reports.
+    function getAllUnsolicitedBugs() external view returns (UnsolicitedBug[] memory) {
+        UnsolicitedBug[] memory allBugs = new UnsolicitedBug[](unsolicitedBugCount);
+        for (uint256 i = 1; i <= unsolicitedBugCount; i++) {
+            allBugs[i - 1] = unsolicitedBugs[i];
+        }
+        return allBugs;
     }
 }

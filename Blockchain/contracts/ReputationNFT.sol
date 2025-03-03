@@ -11,7 +11,7 @@ contract ReputationNFT is ERC721, Ownable {
     mapping(uint256 => uint256) public reputationLevel;
     mapping(uint256 => bool) public staked;
 
-    constructor() ERC721("SecurityReputation", "SRNFT") {
+    constructor() ERC721("SecurityReputation", "SRNFT") Ownable(msg.sender) {
         tokenCounter = 0;
     }
 
