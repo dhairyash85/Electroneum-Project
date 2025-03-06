@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useParams } from "next/navigation";
@@ -58,8 +59,7 @@ export default function SubmitBugPage() {
       }
     }
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [ id]);
 
   if (loading)
     return <div className="container mx-auto p-4 text-white">Loading...</div>;
