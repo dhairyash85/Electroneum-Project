@@ -31,7 +31,7 @@ export default function SubmitBugPopup({ onClose, id }: SubmitBugPopupProps) {
           bugDescription,
           errorMessage,
           codeSnippet,
-          bounyId:id
+          bountyId:id
         }),
       });
       const data = await response.json();
