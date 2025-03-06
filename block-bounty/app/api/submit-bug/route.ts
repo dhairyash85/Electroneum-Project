@@ -3,23 +3,91 @@ import * as snarkjs from "snarkjs";
 import crypto from "crypto";
 import path from "path";
 import { bugBountyContract } from "@/lib/contract";
+import { Pinecone } from "@pinecone-database/pinecone";
+import { OpenAI } from "openai";
+
+// Initialize OpenAI for embeddings
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+// Initialize Pinecone
+const pinecone = new Pinecone({apiKey: process.env.PINECONE_API_KEY || ""});
+
 
 interface RequestBody {
   bugDescription: string;
   errorMessage: string;
   codeSnippet: string;
   bountyId: number;
+  company: string;  // Add this field
 }
 
 export async function POST(req: Request) {
   try {
-    console.log("Parsing request...");
-    const { bugDescription, errorMessage, codeSnippet, bountyId }: RequestBody = await req.json();
-    console.log("Request body:", { bugDescription, errorMessage, codeSnippet, bountyId });
+    const { bugDescription, errorMessage, codeSnippet, bountyId, company }: RequestBody = await req.json();
     
     const fullBugReport = `${bugDescription}\n${errorMessage}\n${codeSnippet}`;
     console.log("Full Bug Report:", fullBugReport);
     
+    // Generate embeddings for the bug report using OpenAI
+    const embeddingResponse = await openai.embeddings.create({
+      model: "text-embedding-ada-002",
+      input: fullBugReport,
+    });
+    const embedding = embeddingResponse.data[0].embedding;
+    
+    // Modified Pinecone query with company filter
+    const index = pinecone.index("bugs");
+    const queryResponse = await index.query({
+      vector: embedding,
+      topK: 3,
+      includeMetadata: true,
+      includeValues: false,
+      filter: {
+        company: company  // Filter by company
+      }
+    });
+    
+    // Check if similar bugs exist
+    if (queryResponse.matches && queryResponse.matches.length > 0) {
+      // Use LLM to determine if the new bug is similar to existing ones
+      const existingBugs = queryResponse.matches
+        .map(match => match.metadata?.fullReport as string | undefined)
+        .filter((report): report is string => report !== undefined);
+      
+      if (existingBugs.length > 0) {
+        const similarityCheckPrompt = `
+        I have a new bug report:
+        "${fullBugReport}"
+        
+        And these existing bug reports:
+        ${existingBugs.map((bug: string, i: number) => `${i+1}. "${bug}"`).join('\n')}
+        
+        Are these bugs describing the same issue? Focus on the core problem, not just similar wording.
+        Answer with 'Yes' if they describe the same underlying issue, or 'No' if they are different issues.
+        `;
+        
+        const similarityResponse = await openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [{ role: "user", content: similarityCheckPrompt }],
+        });
+        
+        const similarityResult = similarityResponse.choices[0].message.content;
+        
+        if (similarityResult?.includes("Yes")) {
+          return NextResponse.json(
+            { 
+              error: "Similar bug already reported", 
+              similarBugs: queryResponse.matches.map((match) => match.metadata) 
+            },
+            { status: 409 }
+          );
+        }
+      }
+    }
+    
+    // If no similar bugs found, proceed with hash generation and zk-proof
     const hashHex = crypto.createHash("sha256").update(fullBugReport).digest("hex");
     console.log("SHA-256 Hash:", hashHex);
     
@@ -71,7 +139,22 @@ export async function POST(req: Request) {
     console.log("Transaction sent:", tx.hash);
     await tx.wait();
     console.log("Transaction confirmed");
-
+    
+    // Store the bug report in Pinecone for future similarity checks
+    await index.upsert([{
+      id: submissionHash,
+      values: embedding,
+      metadata: {
+        bountyId,
+        bugDescription,
+        errorMessage,
+        codeSnippet,
+        fullReport: fullBugReport,
+        txHash: tx.hash,
+        timestamp: new Date().toISOString(),
+        company: company
+      }
+    }]);
     return NextResponse.json(
       {
         message: "Bug submitted successfully",
