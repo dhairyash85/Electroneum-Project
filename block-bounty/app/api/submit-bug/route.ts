@@ -5,6 +5,7 @@ import path from "path";
 import { bugBountyContract } from "@/lib/contract";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAI } from "openai";
+import { CohereClient } from "cohere-ai";
 
 // Initialize OpenAI for embeddings
 const openai = new OpenAI({
@@ -13,6 +14,11 @@ const openai = new OpenAI({
 
 // Initialize Pinecone
 const pinecone = new Pinecone({apiKey: process.env.PINECONE_API_KEY || ""});
+
+// Initialize Cohere
+const cohere = new CohereClient({
+  token: process.env.COHERE_API_KEY || "",
+});
 
 
 interface RequestBody {
@@ -57,23 +63,15 @@ export async function POST(req: Request) {
         .filter((report): report is string => report !== undefined);
       
       if (existingBugs.length > 0) {
-        const similarityCheckPrompt = `
-        I have a new bug report:
-        "${fullBugReport}"
-        
-        And these existing bug reports:
-        ${existingBugs.map((bug: string, i: number) => `${i+1}. "${bug}"`).join('\n')}
-        
-        Are these bugs describing the same issue? Focus on the core problem, not just similar wording.
-        Answer with 'Yes' if they describe the same underlying issue, or 'No' if they are different issues.
-        `;
-        
-        const similarityResponse = await openai.chat.completions.create({
-          model: "gpt-4",
-          messages: [{ role: "user", content: similarityCheckPrompt }],
+ 
+        const similarityResponse = await cohere.classify({
+          inputs: [fullBugReport],
+          examples: existingBugs.map(bug => ({
+            text: bug,
+            label: "similar"
+          })),
         });
-        
-        const similarityResult = similarityResponse.choices[0].message.content;
+        const similarityResult = similarityResponse.classifications[0].prediction;
         
         if (similarityResult?.includes("Yes")) {
           return NextResponse.json(
