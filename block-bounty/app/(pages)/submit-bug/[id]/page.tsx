@@ -45,6 +45,7 @@ export default function SubmitBugPage() {
             const response = await axios.post("/api/company", {
               userId: bountyData.assignedDAO,
               role: "company",
+              bountyId: id
             });
             // Expect the API to return an array of publicMetadata objects
             const companies: CompanyMetadata = response.data.company;
