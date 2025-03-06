@@ -21,7 +21,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     try {
-      const accounts: string[] = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const provider=new ethers.BrowserProvider(window.ethereum);
       const signer=await provider.getSigner()
       const wallet=await signer.getAddress()

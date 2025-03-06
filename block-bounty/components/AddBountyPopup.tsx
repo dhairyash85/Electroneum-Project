@@ -30,9 +30,9 @@ export default function AddBountyPopup({ onClose }: AddBountyPopupProps) {
       if (!walletAddress) throw new Error("Wallet not connected");
       await createBounty(rewardWei.toString(),deadlineUnix,walletAddress,rewardWei.toString())
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create bounty:", err);
-      setError(err.message || "Failed to create bounty.");
+      setError("Failed to create bounty.");
     } finally {
       setLoading(false);
     }

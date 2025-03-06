@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import * as snarkjs from "snarkjs";
-import { promises as fs } from "fs";
 import crypto from "crypto";
 import path from "path";
 
@@ -32,10 +31,10 @@ export async function POST(req: Request) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating zk proof:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate zk proof" },
+      { error:  "Failed to generate zk proof" },
       { status: 500 }
     );
   }

@@ -49,7 +49,7 @@ export default function SubmitBugPage() {
             const companies: CompanyMetadata = response.data.company;
             setCompany(companies);
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error("Error fetching bounty data:", err);
           setError("Failed to load bounty details.");
         } finally {
@@ -58,7 +58,7 @@ export default function SubmitBugPage() {
       }
     }
     fetchData();
-  }, [id]);
+  }, [id, getBountyById]);
 
   if (loading)
     return <div className="container mx-auto p-4 text-white">Loading...</div>;

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ethers } from "ethers";
 import { useWallet } from "@/lib/context/WalletContext"; // Assumes your context provides bugBountyContract
 
 export interface Bounty {
@@ -27,6 +26,14 @@ export interface UnsolicitedBug {
   isApproved: boolean;
   isRejected: boolean;
 }
+export interface Bug {
+  tokenId: number;
+submissionHash: string;
+researcher: string;
+company: string;
+isApproved: boolean;
+isRejected: boolean;
+}
 
 export function useBugBounty() {
   const { bugBountyContract } = useWallet();
@@ -41,7 +48,7 @@ export function useBugBounty() {
       if (!bugBountyContract) return;
       try {
         // Call the getter function that returns all bounties
-        const result: any[] = await bugBountyContract.getAllBounties();
+        const result: Bounty[] = await bugBountyContract.getAllBounties();
         // Our contract maps bounties from 1 to bountyCount so we adjust index accordingly.
         const parsedBounties = result.map((bounty, i) => ({
           id: i + 1,
@@ -78,8 +85,8 @@ export function useBugBounty() {
   async function getSubmissions(bountyId: number): Promise<Submission[]> {
     if (!bugBountyContract) throw new Error("Contract not loaded");
     const subs = await bugBountyContract.getSubmissions(bountyId);
-    return subs.map((sub: any) => ({
-      bountyId: sub.bountyId.toNumber(),
+    return subs.map((sub: Submission) => ({
+      bountyId: Number(sub.bountyId),
       submissionHash: sub.submissionHash,
       researcher: sub.researcher,
       isApproved: sub.isApproved,
@@ -103,8 +110,8 @@ export function useBugBounty() {
   async function getAllUnsolicitedBugs(): Promise<UnsolicitedBug[]> {
     if (!bugBountyContract) throw new Error("Contract not loaded");
     const bugs = await bugBountyContract.getAllUnsolicitedBugs();
-    return bugs.map((bug: any) => ({
-      tokenId: bug.tokenId.toNumber(),
+    return bugs.map((bug: Bug) => ({
+      tokenId: Number(bug.tokenId),
       submissionHash: bug.submissionHash,
       researcher: bug.researcher,
       company: bug.company,
@@ -210,7 +217,7 @@ export function useBugBounty() {
     async function fetchBounties() {
       if (!bugBountyContract) return;
       try {
-        const result: any[] = await bugBountyContract.getAllBounties();
+        const result: Bounty[] = await bugBountyContract.getAllBounties();
         const parsedBounties = result.map((bounty, i) => ({
           id: i + 1,
           creator: bounty.creator,

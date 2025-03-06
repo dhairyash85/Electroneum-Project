@@ -1,16 +1,15 @@
-import { clerkClient } from "@clerk/nextjs/server";
+import { clerkClient , User} from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-
 export async function POST(req: Request) {
   const {  walletAddress } = await req.json();
 
 
   try {
     const client = await clerkClient();
-    const usersResponse = await client.users.getUserList({ limit: 100 });
-    const users = (usersResponse as any).data || usersResponse;
+    const userList: { data: User[] } = await client.users.getUserList({ limit: 100 });
+    const users: User[] = userList.data;
 
-    const filteredUsers = users.filter((user: any) => {
+    const filteredUsers = users.filter((user: User) => {
       const metadata = user.publicMetadata || {};
       if (walletAddress && metadata.walletAddress !== walletAddress)
         return false;

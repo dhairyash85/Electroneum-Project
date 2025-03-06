@@ -38,9 +38,9 @@ export default function SubmitBugPopup({ onClose }: SubmitBugPopupProps) {
       }
       // If successful, you could optionally handle returned zk-proof data here.
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error submitting bug:", err);
-      setSubmitError(err.message || "Submission failed");
+      setSubmitError(String(err));
     } finally {
       setLoading(false);
     }

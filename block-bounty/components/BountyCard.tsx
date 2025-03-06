@@ -10,7 +10,6 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
 import axiosInstance from "@/lib/services/axiosInstance";
 
 interface Bounty {
@@ -48,7 +47,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
         // Expecting an array of public metadata objects in response
         const publicMetadataArr: CompanyMetadata = response.data.company;
         setCompany(publicMetadataArr);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching company metadata:", err);
         setError("Failed to fetch company metadata");
       } finally {

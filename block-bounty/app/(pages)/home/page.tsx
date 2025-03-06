@@ -1,6 +1,5 @@
 "use client"
 import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
 import { useBugBounty } from "@/lib/hooks/useBugBounty";
 import BountyCard from "@/components/BountyCard";
 import { Button } from "@/components/ui/button"; // Adjust the import as needed

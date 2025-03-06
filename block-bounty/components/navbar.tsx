@@ -2,7 +2,6 @@
 import React from "react";
 import { Button } from "./ui/button";
 import {
-  ClerkProvider,
   SignInButton,
   SignedIn,
   SignedOut,

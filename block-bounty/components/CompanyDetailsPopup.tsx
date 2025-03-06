@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 export default function CompanyDetailsPopup() {
   const { user, isLoaded } = useUser();
   const [name, setName] = useState("");
-  const [companyUrl, setCompanyUrl] = useState("");
   const [codebase, setCodebase] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const { walletAddress } = useWallet();

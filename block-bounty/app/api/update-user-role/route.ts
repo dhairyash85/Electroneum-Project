@@ -1,8 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { getAuth, clerkClient } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
-type Data = { message: string } | { error: string };
 
 export async function POST(req: NextRequest) {
   const { userId } = getAuth(req);

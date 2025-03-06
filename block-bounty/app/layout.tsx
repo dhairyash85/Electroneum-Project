@@ -1,11 +1,10 @@
 "use client";
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import RoleSelectionPopup from "@/components/RoleSelectionPopup";
-import { useWallet, WalletProvider } from "@/lib/context/WalletContext";
+import { WalletProvider } from "@/lib/context/WalletContext";
 import CompanyDetailsPopup from "@/components/CompanyDetailsPopup";
 const geistSans = Geist({
   variable: "--font-geist-sans",
