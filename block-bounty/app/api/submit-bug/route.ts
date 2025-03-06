@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const hashHex = crypto.createHash("sha256").update(fullBugReport).digest("hex");
     const bugDetailsNumeric = BigInt(`0x${hashHex}`).toString();
     const input = { bugDetails: bugDetailsNumeric };
-    const wasmPath = path.join(process.cwd(), "circuits", "bugProof.wasm");
+    const wasmPath = path.join(process.cwd(), "circuits", "BugProof.wasm");
     const zkeyPath = path.join(process.cwd(), "circuits", "BugProof.groth16.zkey");
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
     console.log("Full Bug Report:", fullBugReport);
