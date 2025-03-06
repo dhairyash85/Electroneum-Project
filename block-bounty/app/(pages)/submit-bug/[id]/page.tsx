@@ -58,7 +58,8 @@ export default function SubmitBugPage() {
       }
     }
     fetchData();
-  }, [id, getBountyById]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   if (loading)
     return <div className="container mx-auto p-4 text-white">Loading...</div>;
