@@ -23,6 +23,10 @@ export async function POST(req: Request) {
     const hashHex = crypto.createHash("sha256").update(fullBugReport).digest("hex");
     console.log("SHA-256 Hash:", hashHex);
     
+    // Ensure hash has "0x" prefix
+    const submissionHash = hashHex.startsWith("0x") ? hashHex : `0x${hashHex}`;
+    console.log("Submission Hash (with prefix):", submissionHash);
+    
     const bugDetailsNumeric = BigInt(`0x${hashHex}`).toString();
     console.log("Numeric bug details:", bugDetailsNumeric);
     
@@ -36,14 +40,13 @@ export async function POST(req: Request) {
     console.log("Generating zk-SNARK proof...");
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
     
-    console.log("Proof before trimming:", proof);
+    console.log("Proof:", proof);
     console.log("Public Signals:", publicSignals);
     console.log("pi_a length:", proof.pi_a.length);
     console.log("pi_b length:", proof.pi_b.length, "pi_b[0] length:", proof.pi_b[0].length);
     console.log("pi_c length:", proof.pi_c.length);
     console.log("publicSignals length:", publicSignals.length);
 
-    // Trim the arrays to the expected length
     const aTrimmed = proof.pi_a.slice(0, 2);
     const bTrimmed = proof.pi_b.slice(0, 2);
     const cTrimmed = proof.pi_c.slice(0, 2);
@@ -59,7 +62,7 @@ export async function POST(req: Request) {
     console.log("Calling submitBugWithProof on contract...");
     const tx = await bugBountyContract.submitBugWithProof(
       bountyId,
-      hashHex,
+      submissionHash,
       aTrimmed,
       bTrimmed,
       cTrimmed,
@@ -74,7 +77,7 @@ export async function POST(req: Request) {
         message: "Bug submitted successfully",
         proof,
         publicSignals,
-        bugReportHash: hashHex,
+        bugReportHash: submissionHash,
         txHash: tx.hash,
       },
       { status: 200 }
