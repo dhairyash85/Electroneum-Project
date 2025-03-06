@@ -14,6 +14,7 @@ async function initializePinecone() {
   try {
     const indexList = await pinecone.listIndexes();
     const existingIndexes = indexList.indexes?.map(index => index.name) || [];
+    console.log(existingIndexes)
     if (!existingIndexes.includes("bugs")) {
       await pinecone.createIndex({
         name: "bugs",
@@ -128,20 +129,9 @@ const isSimilar = (similarityResponse?.classifications?.[0]?.confidence ?? 0) > 
     console.log("Generating zk-SNARK proof...");
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
     
-    console.log("Proof:", proof);
-    console.log("Public Signals:", publicSignals);
-    console.log("pi_a length:", proof.pi_a.length);
-    console.log("pi_b length:", proof.pi_b.length, "pi_b[0] length:", proof.pi_b[0].length);
-    console.log("pi_c length:", proof.pi_c.length);
-    console.log("publicSignals length:", publicSignals.length);
-
     const aTrimmed = proof.pi_a.slice(0, 2);
     const bTrimmed = proof.pi_b.slice(0, 2);
     const cTrimmed = proof.pi_c.slice(0, 2);
-
-    console.log("Trimmed pi_a:", aTrimmed);
-    console.log("Trimmed pi_b:", bTrimmed);
-    console.log("Trimmed pi_c:", cTrimmed);
 
     if (!bugBountyContract || typeof bugBountyContract.submitBugWithProof !== "function") {
       throw new Error("Contract instance or submitBugWithProof function not found");
@@ -159,9 +149,10 @@ const isSimilar = (similarityResponse?.classifications?.[0]?.confidence ?? 0) > 
     console.log("Transaction sent:", tx.hash);
     await tx.wait();
     console.log("Transaction confirmed");
-    
-    // Store the bug report in Pinecone for future similarity checks
-    await index.upsert([{
+
+    // // In your upsert operation
+    try {
+      await index.upsert([{
         id: submissionHash,
         values: Array.isArray(embedding) ? embedding : Object.values(embedding),
         metadata: {
@@ -170,12 +161,21 @@ const isSimilar = (similarityResponse?.classifications?.[0]?.confidence ?? 0) > 
           errorMessage,
           codeSnippet,
           fullReport: fullBugReport,
-          txHash: tx.hash,
           timestamp: new Date().toISOString(),
           company: company
         }
-      }
-    ]);
+      }]);
+    } catch (upsertError) {
+      console.error("Upsert error details:", {
+        error: upsertError,
+        vectorLength: Array.isArray(embedding) ? embedding.length : Object.values(embedding).length,
+        metadata: {
+          bountyId,
+          company
+        }
+      });
+      throw upsertError;
+    }
     return NextResponse.json(
       {
         message: "Bug submitted successfully",
