@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -10,7 +11,9 @@ export default function Home() {
         <p className="text-lg text-muted-foreground mb-8">
           A decentralized bug bounty platform leveraging blockchain and zero-knowledge proofs.
         </p>
+        <Link href={"/home"}>
         <Button size="lg">Get Started</Button>
+        </Link>
       </section>
 
       <section className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">

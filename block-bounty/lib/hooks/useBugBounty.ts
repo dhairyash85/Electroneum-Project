@@ -69,7 +69,7 @@ export function useBugBounty() {
       id: bountyId,
       creator: bounty.creator,
       reward: bounty.reward.toString(),
-      deadline: bounty.deadline.toNumber(),
+      deadline: Number(bounty.deadline),
       isOpen: bounty.isOpen,
       assignedDAO: bounty.assignedDAO,
     };

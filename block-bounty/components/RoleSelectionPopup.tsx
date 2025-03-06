@@ -9,6 +9,7 @@ export default function RoleSelectionPopup() {
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
+    console.log(user?.publicMetadata)
     if (isLoaded && user && !user?.publicMetadata?.role) {
       setShowPopup(true);
     } else {
