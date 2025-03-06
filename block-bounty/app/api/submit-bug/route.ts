@@ -49,12 +49,13 @@ interface RequestBody {
   errorMessage: string;
   codeSnippet: string;
   bountyId: number;
-  company: string;  // Add this field
+  company: string;  
+  hunter: string;
 }
 
 export async function POST(req: Request) {
   try {
-    const { bugDescription, errorMessage, codeSnippet, bountyId, company }: RequestBody = await req.json();
+    const { bugDescription, errorMessage, codeSnippet, bountyId, company, hunter }: RequestBody = await req.json();
     
     const fullBugReport = `${bugDescription}\n${errorMessage}\n${codeSnippet}`;
     console.log("Full Bug Report:", fullBugReport);
@@ -161,7 +162,8 @@ const embedding = Array.isArray(embeddingResponse.embeddings)
           codeSnippet,
           fullReport: fullBugReport,
           timestamp: new Date().toISOString(),
-          company: company
+          company: company,
+          hunter
         }
       }]);
     } catch (upsertError) {

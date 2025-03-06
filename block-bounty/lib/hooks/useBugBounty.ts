@@ -85,6 +85,7 @@ export function useBugBounty() {
   async function getSubmissions(bountyId: number): Promise<Submission[]> {
     if (!bugBountyContract) throw new Error("Contract not loaded");
     const subs = await bugBountyContract.getSubmissions(bountyId);
+    console.log(subs)
     return subs.map((sub: Submission) => ({
       bountyId: Number(sub.bountyId),
       submissionHash: sub.submissionHash,

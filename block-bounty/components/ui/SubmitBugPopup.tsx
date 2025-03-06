@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useWallet } from "@/lib/context/WalletContext";
 
 interface SubmitBugPopupProps {
   onClose: () => void;
@@ -14,6 +15,7 @@ export default function SubmitBugPopup({ onClose, id }: SubmitBugPopupProps) {
   const [codeSnippet, setCodeSnippet] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const {walletAddress}=useWallet()
   console.log(id)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,8 @@ export default function SubmitBugPopup({ onClose, id }: SubmitBugPopupProps) {
           bugDescription,
           errorMessage,
           codeSnippet,
-          bountyId:id
+          bountyId:id,
+          hunter: walletAddress
         }),
       });
       const data = await response.json();

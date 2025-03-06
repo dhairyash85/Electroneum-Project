@@ -57,4 +57,8 @@ contract ReputationNFT is ERC721, Ownable {
             reputationLevel[tokenId] -= amount;
         }
     }
+
+    function getReputationOf(address user) external view returns (uint256) {
+        return reputationLevel[ownerToTokenId[user]];
+    }
 }
