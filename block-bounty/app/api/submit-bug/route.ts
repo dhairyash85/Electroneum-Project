@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from "next/server";
 import * as snarkjs from "snarkjs";
 import crypto from "crypto";
@@ -138,14 +139,10 @@ const embedding = Array.isArray(embeddingResponse.embeddings)
     }
     
     console.log("Calling submitBugWithProof on contract...");
-    const tx = await bugBountyContract.submitBugWithProof(
+    const tx = await bugBountyContract.submitBug(
       bountyId,
       submissionHash,
-      aTrimmed,
-      bTrimmed,
-      cTrimmed,
-      publicSignals
-    );
+      );
     console.log("Transaction sent:", tx.hash);
     await tx.wait();
     console.log("Transaction confirmed");
