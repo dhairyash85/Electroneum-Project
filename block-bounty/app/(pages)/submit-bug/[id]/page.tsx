@@ -44,8 +44,7 @@ export default function SubmitBugPage() {
           if (bountyData?.assignedDAO) {
             const response = await axios.post("/api/company", {
               userId: bountyData.assignedDAO,
-              role: "company",
-              bountyId: id
+              role: "company"
             });
             // Expect the API to return an array of publicMetadata objects
             const companies: CompanyMetadata = response.data.company;
@@ -106,7 +105,8 @@ export default function SubmitBugPage() {
       <div className="flex justify-center">
         <Button onClick={()=>setIsSubmitting(true)} variant="default">Submit Bug</Button>
       </div>
-      { isSubmitting && <SubmitBugPopup onClose={()=>setIsSubmitting(false)} /> }
+      {isSubmitting && <SubmitBugPopup id={typeof id === 'string' ? id : id?id[0]:""} onClose={() => setIsSubmitting(false)} />}
+
     </div>
   );
 }

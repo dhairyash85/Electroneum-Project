@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 
 interface SubmitBugPopupProps {
   onClose: () => void;
+  id: string;
 }
 
-export default function SubmitBugPopup({ onClose }: SubmitBugPopupProps) {
+export default function SubmitBugPopup({ onClose, id }: SubmitBugPopupProps) {
   const [bugDescription, setBugDescription] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [codeSnippet, setCodeSnippet] = useState("");
@@ -30,6 +31,7 @@ export default function SubmitBugPopup({ onClose }: SubmitBugPopupProps) {
           bugDescription,
           errorMessage,
           codeSnippet,
+          bounyId:id
         }),
       });
       const data = await response.json();

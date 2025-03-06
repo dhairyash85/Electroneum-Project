@@ -13,6 +13,7 @@ interface RequestBody {
 
 export async function POST(req: Request) {
   try {
+    console.log(bugBountyContract)
     console.log("Parsing request body...");
     const { bugDescription, errorMessage, codeSnippet, bountyId }: RequestBody = await req.json();
     console.log("Request body:", { bugDescription, errorMessage, codeSnippet, bountyId });
