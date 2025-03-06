@@ -83,18 +83,17 @@ const embedding = Array.isArray(embeddingResponse.embeddings)
     // Check if similar bugs exist
     if (queryResponse.matches && queryResponse.matches.length > 0) {
       const existingBugs = queryResponse.matches
-        .map(match => match.metadata?.fullReport as string | undefined)
-        .filter((report): report is string => report !== undefined);
+        .map(match => ({
+          report: match.metadata?.fullReport as string | undefined,
+          score: match.score
+        }))
+        .filter((item): item is { report: string; score: number } => 
+          item.report !== undefined && item.score !== undefined
+        );
       
       if (existingBugs.length > 0) {
-        const similarityResponse = await cohere.classify({
-          inputs: [fullBugReport],
-          examples: existingBugs.map(bug => ({
-            text: bug,
-            label: "similar"
-          })),
-        });
-const isSimilar = (similarityResponse?.classifications?.[0]?.confidence ?? 0) > 0.8;
+        // Use cosine similarity score from Pinecone instead of Cohere classify
+        const isSimilar = existingBugs.some(bug => bug.score > 0.85);
         
         if (isSimilar) {
           return NextResponse.json(
