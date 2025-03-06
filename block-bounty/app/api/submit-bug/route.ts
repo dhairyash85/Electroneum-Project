@@ -4,13 +4,7 @@ import crypto from "crypto";
 import path from "path";
 import { bugBountyContract } from "@/lib/contract";
 import { Pinecone } from "@pinecone-database/pinecone";
-import { OpenAI } from "openai";
 import { CohereClient } from "cohere-ai";
-
-// Initialize OpenAI for embeddings
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
 
 // Initialize Pinecone
 const pinecone = new Pinecone({apiKey: process.env.PINECONE_API_KEY || ""});
@@ -36,17 +30,19 @@ export async function POST(req: Request) {
     const fullBugReport = `${bugDescription}\n${errorMessage}\n${codeSnippet}`;
     console.log("Full Bug Report:", fullBugReport);
     
-    // Generate embeddings for the bug report using OpenAI
-    const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-ada-002",
-      input: fullBugReport,
+    // Generate embeddings using Cohere
+    const embeddingResponse = await cohere.embed({
+      texts: [fullBugReport],
+      model: "embed-english-v2.0"
     });
-    const embedding = embeddingResponse.data[0].embedding;
+const embedding = Array.isArray(embeddingResponse.embeddings) 
+  ? embeddingResponse.embeddings[0] 
+  : embeddingResponse.embeddings;
     
     // Modified Pinecone query with company filter
     const index = pinecone.index("bugs");
     const queryResponse = await index.query({
-      vector: embedding,
+      vector: Array.isArray(embedding) ? embedding : Object.values(embedding),
       topK: 3,
       includeMetadata: true,
       includeValues: false,
@@ -57,13 +53,11 @@ export async function POST(req: Request) {
     
     // Check if similar bugs exist
     if (queryResponse.matches && queryResponse.matches.length > 0) {
-      // Use LLM to determine if the new bug is similar to existing ones
       const existingBugs = queryResponse.matches
         .map(match => match.metadata?.fullReport as string | undefined)
         .filter((report): report is string => report !== undefined);
       
       if (existingBugs.length > 0) {
- 
         const similarityResponse = await cohere.classify({
           inputs: [fullBugReport],
           examples: existingBugs.map(bug => ({
@@ -71,9 +65,9 @@ export async function POST(req: Request) {
             label: "similar"
           })),
         });
-        const similarityResult = similarityResponse.classifications[0].prediction;
+const isSimilar = (similarityResponse?.classifications?.[0]?.confidence ?? 0) > 0.8;
         
-        if (similarityResult?.includes("Yes")) {
+        if (isSimilar) {
           return NextResponse.json(
             { 
               error: "Similar bug already reported", 
@@ -141,7 +135,7 @@ export async function POST(req: Request) {
     // Store the bug report in Pinecone for future similarity checks
     await index.upsert([{
       id: submissionHash,
-      values: embedding,
+      values: Array.isArray(embedding) ? embedding : Object.values(embedding),
       metadata: {
         bountyId,
         bugDescription,
