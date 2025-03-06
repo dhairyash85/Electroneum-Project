@@ -14,7 +14,7 @@ export default function SubmitBugPopup({ onClose, id }: SubmitBugPopupProps) {
   const [codeSnippet, setCodeSnippet] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
-
+  console.log(id)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
