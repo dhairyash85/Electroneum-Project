@@ -9,6 +9,34 @@ import { CohereClient } from "cohere-ai";
 // Initialize Pinecone
 const pinecone = new Pinecone({apiKey: process.env.PINECONE_API_KEY || ""});
 
+// Create index if it doesn't exist
+async function initializePinecone() {
+  try {
+    const indexList = await pinecone.listIndexes();
+    const existingIndexes = indexList.indexes?.map(index => index.name) || [];
+    if (!existingIndexes.includes("bugs")) {
+      await pinecone.createIndex({
+        name: "bugs",
+        dimension: 4096,
+        metric: "cosine",
+        spec: {
+          serverless: {
+            cloud: "aws",
+            region: "us-east-1"
+          }
+        }
+      });
+      // Wait for index to be ready
+      await new Promise(resolve => setTimeout(resolve, 30000));
+    }
+  } catch (error) {
+    console.error("Error initializing Pinecone:", error);
+  }
+}
+
+// Call initialization before handling requests
+await initializePinecone();
+
 // Initialize Cohere
 const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY || "",
