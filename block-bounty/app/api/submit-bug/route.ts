@@ -162,19 +162,20 @@ const isSimilar = (similarityResponse?.classifications?.[0]?.confidence ?? 0) > 
     
     // Store the bug report in Pinecone for future similarity checks
     await index.upsert([{
-      id: submissionHash,
-      values: Array.isArray(embedding) ? embedding : Object.values(embedding),
-      metadata: {
-        bountyId,
-        bugDescription,
-        errorMessage,
-        codeSnippet,
-        fullReport: fullBugReport,
-        txHash: tx.hash,
-        timestamp: new Date().toISOString(),
-        company: company
+        id: submissionHash,
+        values: Array.isArray(embedding) ? embedding : Object.values(embedding),
+        metadata: {
+          bountyId,
+          bugDescription,
+          errorMessage,
+          codeSnippet,
+          fullReport: fullBugReport,
+          txHash: tx.hash,
+          timestamp: new Date().toISOString(),
+          company: company
+        }
       }
-    }]);
+    ]);
     return NextResponse.json(
       {
         message: "Bug submitted successfully",
