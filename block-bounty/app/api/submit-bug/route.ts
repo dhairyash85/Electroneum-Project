@@ -15,42 +15,54 @@ export async function POST(req: Request) {
   try {
     console.log("Parsing request...");
     const { bugDescription, errorMessage, codeSnippet, bountyId }: RequestBody = await req.json();
+    console.log("Request body:", { bugDescription, errorMessage, codeSnippet, bountyId });
+    
     const fullBugReport = `${bugDescription}\n${errorMessage}\n${codeSnippet}`;
     console.log("Full Bug Report:", fullBugReport);
-
+    
     const hashHex = crypto.createHash("sha256").update(fullBugReport).digest("hex");
     console.log("SHA-256 Hash:", hashHex);
-
+    
     const bugDetailsNumeric = BigInt(`0x${hashHex}`).toString();
     console.log("Numeric bug details:", bugDetailsNumeric);
-
+    
     const input = { bugDetails: bugDetailsNumeric };
-
+    
     const wasmPath = path.join(process.cwd(), "circuits", "BugProof.wasm");
     const zkeyPath = path.join(process.cwd(), "circuits", "BugProof.groth16.zkey");
     console.log("WASM path:", wasmPath);
     console.log("ZKey path:", zkeyPath);
-
+    
     console.log("Generating zk-SNARK proof...");
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
-    console.log("Proof:", proof);
+    
+    console.log("Proof before trimming:", proof);
     console.log("Public Signals:", publicSignals);
     console.log("pi_a length:", proof.pi_a.length);
     console.log("pi_b length:", proof.pi_b.length, "pi_b[0] length:", proof.pi_b[0].length);
     console.log("pi_c length:", proof.pi_c.length);
     console.log("publicSignals length:", publicSignals.length);
 
+    // Trim the arrays to the expected length
+    const aTrimmed = proof.pi_a.slice(0, 2);
+    const bTrimmed = proof.pi_b.slice(0, 2);
+    const cTrimmed = proof.pi_c.slice(0, 2);
+
+    console.log("Trimmed pi_a:", aTrimmed);
+    console.log("Trimmed pi_b:", bTrimmed);
+    console.log("Trimmed pi_c:", cTrimmed);
+
     if (!bugBountyContract || typeof bugBountyContract.submitBugWithProof !== "function") {
       throw new Error("Contract instance or submitBugWithProof function not found");
     }
-
+    
     console.log("Calling submitBugWithProof on contract...");
     const tx = await bugBountyContract.submitBugWithProof(
       bountyId,
       hashHex,
-      proof.pi_a,
-      proof.pi_b,
-      proof.pi_c,
+      aTrimmed,
+      bTrimmed,
+      cTrimmed,
       publicSignals
     );
     console.log("Transaction sent:", tx.hash);
