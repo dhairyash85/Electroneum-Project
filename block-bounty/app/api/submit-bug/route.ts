@@ -137,17 +137,8 @@ const embedding = Array.isArray(embeddingResponse.embeddings)
     if (!bugBountyContract || typeof bugBountyContract.submitBugWithProof !== "function") {
       throw new Error("Contract instance or submitBugWithProof function not found");
     }
-    
-    console.log("Calling submitBugWithProof on contract...");
-    const tx = await bugBountyContract.submitBug(
-      bountyId,
-      submissionHash,
-      );
-    console.log("Transaction sent:", tx.hash);
-    await tx.wait();
-    console.log("Transaction confirmed");
-
-    // // In your upsert operation
+    console.log("Adding into databasr")
+    const submissions=await bugBountyContract.getSumbissions(bountyId);
     try {
       await index.upsert([{
         id: submissionHash,
@@ -160,7 +151,8 @@ const embedding = Array.isArray(embeddingResponse.embeddings)
           fullReport: fullBugReport,
           timestamp: new Date().toISOString(),
           company: company,
-          hunter
+          hunter,
+          submissionId: submissions.length 
         }
       }]);
     } catch (upsertError) {
@@ -174,6 +166,16 @@ const embedding = Array.isArray(embeddingResponse.embeddings)
       });
       throw upsertError;
     }
+    console.log("Calling submitBugWithProof on contract...");
+    const tx = await bugBountyContract.submitBug(
+      bountyId,
+      submissionHash,
+      );
+    console.log("Transaction sent:", tx.hash);
+    await tx.wait();
+    console.log("Transaction confirmed");
+
+    // // In your upsert operation
     return NextResponse.json(
       {
         message: "Bug submitted successfully",

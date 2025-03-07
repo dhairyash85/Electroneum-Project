@@ -1,5 +1,5 @@
-const ReputationNFTAddress= "0x16FB06419E9AC3a660646A18fDF4d612aD6FF41e"
-const BugBountyAddress= "0x795bCC8C109eeB5Ae744b0EDaF8FAf2C5aC3a571"
+const ReputationNFTAddress= "0x48da4828Fe8f2E2EB6B6f3DcBc3eB1466FfeD05D"
+const BugBountyAddress= "0x9f748ba2d0EC6f21eFba22cfc2c01D99f4384540"
 const BugBountyABI=[
   {
     "anonymous": false,
