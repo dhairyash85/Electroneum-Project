@@ -32,87 +32,98 @@ interface BountyWithSubmissions {
   submissions: Submission[];
 }
 
+
+interface UnsolicitedBug {
+  submissionHash: string;
+  report: string,
+  hunter: string;
+  submittedAt: string;
+  isApproved: boolean;
+  isRejected: boolean;
+}
+
 export default function CompanySubmissions() {
   const { user } = useUser();
   const { approveBounty, rejectBug, getSubmissions } = useBugBounty();
   const [bounties, setBounties] = useState<BountyWithSubmissions[]>([]);
+  const [unsolicitedBugs, setUnsolicitedBugs] = useState<UnsolicitedBug[]>([]);
   const [loading, setLoading] = useState(true);
-  // const [reputation, setReputation]=useState(0)
-  // Add these interfaces at the top with existing interfaces
-  interface PineconeBugSubmission {
-    id: string;
-    submissionHash: string;
-    hunter: string;
-    bugDescription: string;
-    errorMessage: string;
-    codeSnippet: string;
-    fullReport: string;
-    isApproved?: boolean;
-    isRejected?: boolean;
-  }
 
-  interface BountyData {
-    creator: string;
-    reward: bigint;
-    deadline: bigint;
-    isOpen: boolean;
-    assignedDAO: string;
-  }
-
-  interface APIBountyResponse {
-    bountyId: number;
-    bountyData: BountyData;
-    submissions: PineconeBugSubmission[];
-  }
-
-  // Update the fetchSubmissions function with proper typing
   useEffect(() => {
-      async function fetchSubmissions() {
-        try {
-          if (!user) return;
-  
-          const walletAddress = user.publicMetadata.walletAddress as string;
-          if (!walletAddress) {
-            console.error("No wallet address found in user metadata");
-            return;
-          }
-  
-          const bountyResponse = await axios.post<{ bounties: APIBountyResponse[] }>("/api/get-company-bounties", {
-            creator: walletAddress,
-          });
-  
-          const transformedBounties: BountyWithSubmissions[] = bountyResponse.data.bounties.map((item) => ({
-            id: item.bountyId,
-            creator: item.bountyData.creator,
-            reward: item.bountyData.reward.toString(),
-            deadline: Number(item.bountyData.deadline),
-            isOpen: item.bountyData.isOpen,
-            assignedDAO: item.bountyData.assignedDAO,
-            submissions: item.submissions.map((sub) => ({
-              bountyId: item.bountyId,
-              submissionHash: sub.submissionHash || sub.id,
-              researcher: sub.hunter || "Unknown",
-              isApproved: sub.isApproved ?? false,
-              isRejected: sub.isRejected ?? false,
-              bugDetails: {
-                bugDescription: sub.bugDescription,
-                errorMessage: sub.errorMessage,
-                codeSnippet: sub.codeSnippet,
-                fullReport: sub.fullReport
-              }
-            }))
-          }));
-  
-          setBounties(transformedBounties);
-        } catch (error) {
-          console.error("Error fetching submissions:", error);
-        } finally {
-          setLoading(false);
+    async function fetchAllSubmissions() {
+      try {
+        if (!user) return;
+
+        const walletAddress = user.publicMetadata.walletAddress as string;
+        if (!walletAddress) {
+          console.error("No wallet address found in user metadata");
+          return;
         }
+
+        // Fetch bounty submissions
+        const bountyResponse = await axios.post("/api/get-company-bounties", {
+          creator: walletAddress,
+        });
+
+        const transformedBounties = bountyResponse.data.bounties.map((item: { 
+          bountyId: number; 
+          bountyData: { 
+            creator: string; 
+            reward: number; 
+            deadline: number; 
+            isOpen: boolean; 
+            assignedDAO: string; 
+          }; 
+          submissions: {
+            submissionHash?: string;
+            id?: string;
+            hunter?: string;
+            isApproved?: boolean;
+            isRejected?: boolean;
+            bugDescription: string;
+            errorMessage: string;
+            codeSnippet: string;
+            fullReport: string;
+          }[] 
+        }) => ({
+          id: item.bountyId,
+          creator: item.bountyData.creator,
+          reward: item.bountyData.reward.toString(),
+          deadline: Number(item.bountyData.deadline),
+          isOpen: item.bountyData.isOpen,
+          assignedDAO: item.bountyData.assignedDAO,
+          submissions: item.submissions.map((sub) => ({
+            bountyId: item.bountyId,
+            submissionHash: sub.submissionHash || sub.id,
+            researcher: sub.hunter || "Unknown",
+            isApproved: sub.isApproved ?? false,
+            isRejected: sub.isRejected ?? false,
+            bugDetails: {
+              bugDescription: sub.bugDescription,
+              errorMessage: sub.errorMessage,
+              codeSnippet: sub.codeSnippet,
+              fullReport: sub.fullReport
+            }
+          }))
+        }));
+
+        setBounties(transformedBounties);
+
+        // Fetch unsolicited bugs
+        const unsolicitedResponse = await axios.post("/api/get-unsolicited-bugs", {
+          companyWallet: walletAddress,
+        });
+        setUnsolicitedBugs(unsolicitedResponse.data.submissions);
+
+      } catch (error) {
+        console.error("Error fetching submissions:", error);
+      } finally {
+        setLoading(false);
       }
-  
-      fetchSubmissions();
-    }, [user]);
+    }
+
+    fetchAllSubmissions();
+  }, [user]);
 
   const handleApprove = async (bountyId: number, submissionIndex: number) => {
     try {
@@ -149,8 +160,12 @@ export default function CompanySubmissions() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6 text-white">Bug Submissions</h1>
-      {bounties.map((bounty) => (
-        <div key={bounty.id} className="mb-8 bg-gray-800 rounded-lg p-4">
+      
+      {/* Bounty Submissions */}
+      <div className="mb-12">
+        <h2 className="text-xl font-semibold mb-4 text-white">Bounty Submissions</h2>
+        {bounties.map((bounty) => 
+          bounty.isOpen?<div key={bounty.id} className="mb-8 bg-gray-800 rounded-lg p-4">
           <h2 className="text-xl font-semibold mb-4 text-white">
             Bounty #{bounty.id} - Reward: {bounty.reward} ETH
           </h2>
@@ -184,7 +199,6 @@ export default function CompanySubmissions() {
                     ? "Rejected"
                     : "Pending"}
                 </p>
-                {!submission.isApproved && !submission.isRejected && (
                   <div className="flex space-x-4 mt-4">
                     <button
                       onClick={() => handleApprove(bounty.id, index)}
@@ -199,18 +213,59 @@ export default function CompanySubmissions() {
                       Reject
                     </button>
                   </div>
-                )}
               </div>
             ))}
             {bounty.submissions.length === 0 && (
               <p className="text-gray-400">No submissions yet</p>
             )}
           </div>
+        </div>:<>
+            Bounty Closed
+        </>
+        )}
+        {bounties.length === 0 && (
+          <p className="text-gray-400">No bounties found</p>
+        )}
+      </div>
+
+      {/* Unsolicited Bugs */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4 text-white">Unsolicited Bug Reports</h2>
+        <div className="space-y-4">
+          {unsolicitedBugs.map((bug) => (
+            <div
+              key={bug.submissionHash}
+              className="border border-gray-700 rounded-lg p-4"
+            >
+              <p className="mb-2 text-white">
+                <span className="font-semibold">Researcher:</span> {bug.hunter}
+              </p>
+              <div className="mt-4 space-y-2 text-gray-300">
+                <p><span className="font-semibold">Description:</span> {bug.report.split("\n")[0]}</p>
+                <p><span className="font-semibold">Error:</span> {bug.report.split("\n")[1]}</p>
+                <div className="bg-gray-900 p-2 rounded">
+                  <p className="font-semibold">Code Snippet:</p>
+                  <pre className="whitespace-pre-wrap">{bug.report.split("\n")[2]}</pre>
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-gray-400">
+                Submitted: {new Date(bug.submittedAt).toLocaleString()}
+              </p>
+              <p className="mb-2 text-white">
+                <span className="font-semibold">Status:</span>{" "}
+                {bug.isApproved
+                  ? "Approved"
+                  : bug.isRejected
+                  ? "Rejected"
+                  : "Pending"}
+              </p>
+            </div>
+          ))}
+          {unsolicitedBugs.length === 0 && (
+            <p className="text-gray-400">No unsolicited bug reports</p>
+          )}
         </div>
-      ))}
-      {bounties.length === 0 && (
-        <p className="text-gray-400">No bounties found</p>
-      )}
+      </div>
     </div>
   );
 }

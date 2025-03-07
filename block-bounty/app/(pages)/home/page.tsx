@@ -2,17 +2,18 @@
 import { useUser } from "@clerk/nextjs";
 import { useBugBounty } from "@/lib/hooks/useBugBounty";
 import BountyCard from "@/components/BountyCard";
-import { Button } from "@/components/ui/button"; // Adjust the import as needed
+import CompanyList from "@/components/CompanyList";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddBountyPopup from "@/components/AddBountyPopup";
 
 export default function Home() {
   const { user, isLoaded } = useUser();
   const { bounties, loading } = useBugBounty();
-  const [isAddingBounty, setIsAddingBounty]=useState<boolean>(false)
+  const [isAddingBounty, setIsAddingBounty] = useState<boolean>(false);
+  
   if (!isLoaded) return <div>Loading user...</div>;
-
-  // Get the role from Clerk public metadata
+  
   const role = user?.publicMetadata?.role;
 
   return (
@@ -27,14 +28,21 @@ export default function Home() {
           ))}
         </div>
       )}
+      
+      {role === "bountyHunter" && (
+        <div className="mt-12">
+          <CompanyList />
+        </div>
+      )}
+      
       <div className="mt-6 flex space-x-4">
-        {role === "bountyHunter" && (
-            <Button variant="default">Submit Bug</Button>
-        )}
         {role === "company" && (
-            <Button onClick={()=>setIsAddingBounty(true)} variant="default">Add Bounty</Button>
+          <Button onClick={() => setIsAddingBounty(true)} variant="default">
+            Add Bounty
+          </Button>
         )}
       </div>
+      
       {isAddingBounty && <AddBountyPopup onClose={() => setIsAddingBounty(false)} />}
     </div>
   );
