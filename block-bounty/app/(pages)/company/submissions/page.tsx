@@ -1,11 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useState } from "react";
 import { useBugBounty } from "@/lib/hooks/useBugBounty";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { useReputationNFT } from "@/lib/hooks/useReputationNFT";
+import Reputation from "@/components/Reputation";
 
 // Remove Pinecone import and initialization
 
@@ -38,7 +37,6 @@ export default function CompanySubmissions() {
   const { approveBounty, rejectBug, getSubmissions } = useBugBounty();
   const [bounties, setBounties] = useState<BountyWithSubmissions[]>([]);
   const [loading, setLoading] = useState(true);
-  const {getReputationOf}=useReputationNFT()
   // const [reputation, setReputation]=useState(0)
   // Add these interfaces at the top with existing interfaces
   interface PineconeBugSubmission {
@@ -156,8 +154,8 @@ export default function CompanySubmissions() {
           <h2 className="text-xl font-semibold mb-4 text-white">
             Bounty #{bounty.id} - Reward: {bounty.reward} ETH
           </h2>
-          <div className="space-y-4">
-            {bounty.submissions.map(async (submission, index) => (
+          <div key={bounty.id} className="space-y-4">
+            {bounty.submissions.map((submission, index) => (
               <div
                 key={submission.submissionHash}
                 className="border border-gray-700 rounded-lg p-4"
@@ -166,7 +164,8 @@ export default function CompanySubmissions() {
                   <span className="font-semibold">Researcher:</span>{" "}
                   {submission.researcher}
                 </p>
-                <p>{await getReputationOf(submission.researcher)}</p>
+                  <Reputation id={submission.researcher} />
+                {/* <p>{await getReputationOf(submission.researcher)}</p> */}
                 {submission.bugDetails && (
                   <div className="mt-4 space-y-2 text-gray-300">
                     <p><span className="font-semibold">Description:</span> {submission.bugDetails.bugDescription}</p>

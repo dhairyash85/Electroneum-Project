@@ -42,8 +42,11 @@ export function useReputationNFT() {
   }
 
   async function getReputationOf(address: string): Promise<number> {
-    if (!reputationNFTContract) throw new Error("Contract not loaded");
+      if (!reputationNFTContract) throw new Error("Contract not loaded");
+      console.log(address)
+
     const reputation = await reputationNFTContract.getReputationOf(address);
+    console.log(reputation)
     return Number(reputation);
   }
 
