@@ -138,7 +138,7 @@ const embedding = Array.isArray(embeddingResponse.embeddings)
       throw new Error("Contract instance or submitBugWithProof function not found");
     }
     console.log("Adding into databasr")
-    const submissions=await bugBountyContract.getSumbissions(bountyId);
+    const submissions=await bugBountyContract.getSubmissions(bountyId);
     try {
       await index.upsert([{
         id: submissionHash,
