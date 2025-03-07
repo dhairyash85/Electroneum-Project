@@ -1,13 +1,13 @@
 "use client"
 import { Button } from "./ui/button"
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs"
+import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs"
 import { useWallet } from "@/lib/context/WalletContext"
 import Link from "next/link"
-import { Bug, Home, Shield } from "lucide-react"
+import { Bug, Home, Shield, Boxes } from "lucide-react"
 
 const Navbar = () => {
   const { connectWallet, isConnected, walletAddress, disconnectWallet } = useWallet()
-
+  const { user, isLoaded } = useUser()
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg border-b border-border/40 bg-background/80">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -30,6 +30,13 @@ const Navbar = () => {
             <Bug className="h-4 w-4" />
             <span>Bounties</span>
           </Link>
+          {isLoaded && user?.publicMetadata.role=="company" && <Link
+            href="/company/submissions"
+            className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            <Boxes className="h-4 w-4" />
+            <span>Submissions</span>
+          </Link>}
         </div>
 
         <div className="flex items-center gap-3">
