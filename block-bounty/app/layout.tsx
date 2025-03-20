@@ -28,27 +28,27 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <WalletProvider>
-        <html lang="en" className="dark">
+      <html lang="en" className="dark">
         <head>
-        {/* Google Analytics */}
-        <Script
-          strategy="afterInteractive"
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        />
-        <Script
-          id="google-analytics"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_MEASUREMENT_ID}');
+          {/* Google Analytics */}
+          <Script
+            strategy="afterInteractive"
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          />
+          <Script
+            id="google-analytics"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
             `,
-          }}
-        />
-      </head>
+            }}
+          />
+        </head>
+        <WalletProvider>
           <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background min-h-screen`}>
             <div className="relative min-h-screen flex flex-col">
               <Navbar />
@@ -62,8 +62,8 @@ export default function RootLayout({
               </footer>
             </div>
           </body>
-        </html>
-      </WalletProvider>
+        </WalletProvider>
+      </html>
     </ClerkProvider>
   )
 }
