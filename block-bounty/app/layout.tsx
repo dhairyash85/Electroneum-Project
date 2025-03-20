@@ -28,6 +28,17 @@ export default function RootLayout({
     <ClerkProvider>
       <WalletProvider>
         <html lang="en" className="dark">
+          <head>
+            {/* <!-- Google tag (gtag.js) --> */}
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-H0WBP5MWS3"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'G-H0WBP5MWS3');
+            </script>
+          </head>
           <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background min-h-screen`}>
             <div className="relative min-h-screen flex flex-col">
               <Navbar />
