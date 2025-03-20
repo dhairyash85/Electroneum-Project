@@ -8,7 +8,9 @@ import { ClerkProvider } from "@clerk/nextjs"
 import RoleSelectionPopup from "@/components/RoleSelectionPopup"
 import { WalletProvider } from "@/lib/context/WalletContext"
 import CompanyDetailsPopup from "@/components/CompanyDetailsPopup"
+import Script from "next/script";
 
+const GA_MEASUREMENT_ID = "G-H0WBP5MWS3";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,17 +30,25 @@ export default function RootLayout({
     <ClerkProvider>
       <WalletProvider>
         <html lang="en" className="dark">
-          <head>
-            {/* <!-- Google tag (gtag.js) --> */}
-            <script async src="https://www.googletagmanager.com/gtag/js?id=G-H0WBP5MWS3"></script>
-            <script>
+        <head>
+        {/* Google Analytics */}
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-
-              gtag('config', 'G-H0WBP5MWS3');
-            </script>
-          </head>
+              gtag('config', '${GA_MEASUREMENT_ID}');
+            `,
+          }}
+        />
+      </head>
           <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background min-h-screen`}>
             <div className="relative min-h-screen flex flex-col">
               <Navbar />
